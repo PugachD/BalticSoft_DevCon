@@ -1,0 +1,6 @@
+D:\мое\Курсы\BalticSoft_DevTest\BalticSoft_DevTest\bin\Debug\BalticSoft_DevTest.exe.config
+D:\мое\Курсы\BalticSoft_DevTest\BalticSoft_DevTest\bin\Debug\BalticSoft_DevTest.exe
+D:\мое\Курсы\BalticSoft_DevTest\BalticSoft_DevTest\bin\Debug\BalticSoft_DevTest.pdb
+D:\мое\Курсы\BalticSoft_DevTest\BalticSoft_DevTest\obj\Debug\BalticSoft_DevTest.csprojResolveAssemblyReference.cache
+D:\мое\Курсы\BalticSoft_DevTest\BalticSoft_DevTest\obj\Debug\BalticSoft_DevTest.exe
+D:\мое\Курсы\BalticSoft_DevTest\BalticSoft_DevTest\obj\Debug\BalticSoft_DevTest.pdb
