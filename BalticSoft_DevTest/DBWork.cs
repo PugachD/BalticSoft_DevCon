@@ -18,10 +18,6 @@ namespace BalticSoft_DevTest
                 sqlConnection.Open();
                 string sqlQuery = String.Format("Select * From dbo.OrderTable Where IDOrder =" + ID);
                 SqlCommand sqlCommand = new SqlCommand(sqlQuery, sqlConnection);
-                /*SqlParameter sqlParameter = sqlCommand.CreateParameter();
-                sqlParameter.SqlDbType = System.Data.SqlDbType.Int;
-                sqlParameter.Value = ID;
-                sqlCommand.Parameters.Add(sqlParameter);*/
                 SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
 
                 while (sqlDataReader.Read())
@@ -84,6 +80,7 @@ namespace BalticSoft_DevTest
                 order = LoadOrder(ID);
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
+                sqlConnection.Open();
                 Console.WriteLine("Новые данные заказа\n");
                 if (!order.IDSupplier.IsNull)
                 {
@@ -170,7 +167,7 @@ namespace BalticSoft_DevTest
                 sqlCommand = new SqlCommand(sqlQuery, sqlConnection);
                 sqlDataReader = sqlCommand.ExecuteReader();
                 while (sqlDataReader.Read())
-                    order.IDClient = sqlDataReader.GetInt32(0);
+                    order.IDSupplier = sqlDataReader.GetInt32(0);
             }
             sqlDataReader.Close();
 
