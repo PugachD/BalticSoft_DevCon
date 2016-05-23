@@ -4,20 +4,23 @@ using System.Data.SqlClient;
 
 namespace BalticSoft_DevTest
 {
-    public class DBWork
+    public static class DBWork
     {
         static string connectionString = @"Data Source=Dmitriy;Initial Catalog=OrderDB;Integrated Security=True";
         /// <summary>
         /// Выгружает из БД заказ с номером заказа, если такой есть
         /// </summary>
-        public Order LoadOrder(int ID)
+         public static Order LoadOrder(int ID)
         {
             Order order = null;
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();
-                string sqlQuery = String.Format("Select * From dbo.OrderTable Where IDOrder =" + ID);
+                SqlParameter sqlParameter = new SqlParameter("@idOrder", System.Data.SqlDbType.Int);
+                sqlParameter.Value = ID;
+                string sqlQuery = String.Format("Select IDOrder,DocNumber,TotalAmountOrder,IDClient,Status,IDSupplier From dbo.OrderTable Where IDOrder = @idOrder");
                 SqlCommand sqlCommand = new SqlCommand(sqlQuery, sqlConnection);
+                sqlCommand.Parameters.Add(sqlParameter);
                 SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
 
                 while (sqlDataReader.Read())
@@ -39,27 +42,12 @@ namespace BalticSoft_DevTest
             return order;
         }
 
-        public void CreateOrder(int who)
+        public static void InsertOrderInDB(Order order)
         {
-            Order order;
-
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 SqlCommand sqlCommand = null;
                 sqlConnection.Open();
-                if (who == 1)
-                {
-                    order = CreateClient(new OrderFromBuyer(), sqlConnection);
-                }
-                else
-                {
-                    order = CreateSupplier(new OrderToTheSupplier(), sqlConnection);
-                }
-
-                EnterData.EnterDataOrder(ref order);
-
-                //Изменяем общую сумму заказа
-                order.Process();
 
                 //Запрос на добавление заказа
                 sqlCommand = new SqlCommand();
@@ -67,6 +55,13 @@ namespace BalticSoft_DevTest
                 sqlCommand.CommandText = @"INSERT INTO OrderDB.dbo.OrderTable (DocNumber, TotalAmountOrder, IDClient, Status, IDSupplier) VALUES (" +
                     order.DocNumber + "," + order.TotalAmountOrder.Value.ToString().Replace(",", ".") + "," + order.IDClient + ",'" + order.Status + "'," + order.IDSupplier + ");";
                 sqlCommand.ExecuteNonQuery();
+
+                string sqlQuery = String.Format("SELECT Top 1 * FROM OrderDB.dbo.OrderTable ORDER BY IDOrder DESC;");
+                sqlCommand = new SqlCommand(sqlQuery, sqlConnection);
+                SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+                while (sqlDataReader.Read())
+                    order.IDOrder = sqlDataReader.GetInt32(0);
+                sqlDataReader.Close();
                 Console.WriteLine("Данные успешно добавлены!!!!!!!!!!");
             }
         }
@@ -74,26 +69,11 @@ namespace BalticSoft_DevTest
         /// <summary>
         /// Изменение заказа с ID
         /// </summary>
-        public void ChangeOrder(int ID)
+        public static void UpdateOrder(Order order)
         {
-            Order order;
-                order = LoadOrder(ID);
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();
-                Console.WriteLine("Новые данные заказа\n");
-                if (!order.IDSupplier.IsNull)
-                {
-                    order = CreateClient(new OrderFromBuyer(), sqlConnection);
-                }
-                else
-                {
-                    order = CreateSupplier(new OrderToTheSupplier(), sqlConnection);
-                }
-                EnterData.EnterDataOrder(ref order);
-
-                //Изменяем общую сумму заказа
-                order.Process();
 
                 SqlCommand sqlCommand = new SqlCommand();
                 sqlCommand.Connection = sqlConnection;
@@ -104,72 +84,80 @@ namespace BalticSoft_DevTest
             }
         }
 
-        private Order CreateClient(OrderFromBuyer order, SqlConnection sqlConnection)
+        public static Order CreateOrderFromBuyer(OrderFromBuyer order)
         {
-            SqlCommand sqlCommand = null;
-            SqlDataReader sqlDataReader = null;
-
-            Console.WriteLine("Выберите ID Клиента, на которого следует оформить заказ");
-            order.IDClient = (SqlInt32)(int.Parse(Console.ReadLine()));
-
-            string sqlQuery = String.Format("Select * From dbo.Client Where IDClient =" + order.IDClient);
-            sqlCommand = new SqlCommand(sqlQuery, sqlConnection);
-            sqlDataReader = sqlCommand.ExecuteReader();
-            if (!sqlDataReader.HasRows)
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                Console.WriteLine("Такого клиента нет в базе данных. Добавим.\n");
+                sqlConnection.Open();
+                SqlCommand sqlCommand = null;
+                SqlDataReader sqlDataReader = null;
 
-                EnterData.EnterDataClient(order);
+                Console.WriteLine("Выберите ID Клиента, на которого следует оформить заказ");
+                order.IDClient = (SqlInt32)(int.Parse(Console.ReadLine()));
 
-                sqlDataReader.Close();
-                sqlCommand = new SqlCommand();
-                sqlCommand.Connection = sqlConnection;
-                sqlCommand.CommandText = @"INSERT INTO Client (Name, Adress) VALUES ('" +
-                    order.NameClient + "','" + order.AdressClient + "');";
-                sqlCommand.ExecuteNonQuery();
-
-                sqlQuery = String.Format("SELECT Top 1 * FROM OrderDB.dbo.Client ORDER BY IDClient DESC;");
+                string sqlQuery = String.Format("Select * From dbo.Client Where IDClient =" + order.IDClient);
                 sqlCommand = new SqlCommand(sqlQuery, sqlConnection);
                 sqlDataReader = sqlCommand.ExecuteReader();
-                while (sqlDataReader.Read())
-                    order.IDClient = sqlDataReader.GetInt32(0);
+                if (!sqlDataReader.HasRows)
+                {
+                    Console.WriteLine("Такого клиента нет в базе данных. Добавим.\n");
+
+                    EnterData.EnterDataClient(order);
+
+                    sqlDataReader.Close();
+                    sqlCommand = new SqlCommand();
+                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.CommandText = @"INSERT INTO Client (Name, Adress) VALUES ('" +
+                        order.NameClient + "','" + order.AdressClient + "');";
+                    sqlCommand.ExecuteNonQuery();
+
+                    sqlQuery = String.Format("SELECT Top 1 * FROM OrderDB.dbo.Client ORDER BY IDClient DESC;");
+                    sqlCommand = new SqlCommand(sqlQuery, sqlConnection);
+                    sqlDataReader = sqlCommand.ExecuteReader();
+                    while (sqlDataReader.Read())
+                        order.IDClient = sqlDataReader.GetInt32(0);
+                }
+                sqlDataReader.Close();
             }
-            sqlDataReader.Close();
 
             return order;
         }
 
-        private Order CreateSupplier(OrderToTheSupplier order, SqlConnection sqlConnection)
+        public static Order CreateOrderToTheSupplier(OrderToTheSupplier order)
         {
-            SqlCommand sqlCommand = null;
-            SqlDataReader sqlDataReader = null;
-
-            Console.WriteLine("ID Поставщика");
-            order.IDSupplier = (SqlInt32)(int.Parse(Console.ReadLine()));
-
-            string sqlQuery = String.Format("Select * From dbo.Supplier Where IDSupplier =" + order.IDSupplier);
-            sqlCommand = new SqlCommand(sqlQuery, sqlConnection);
-            sqlDataReader = sqlCommand.ExecuteReader();
-            if (!sqlDataReader.HasRows)
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                Console.WriteLine("Такого поставщика нет в Базе Данных. Добавим.\n");
+                sqlConnection.Open();
+                SqlCommand sqlCommand = null;
+                SqlDataReader sqlDataReader = null;
 
-                EnterData.EnterDataSupplier(order);
+                Console.WriteLine("ID Поставщика");
+                order.IDSupplier = (SqlInt32)(int.Parse(Console.ReadLine()));
 
-                sqlDataReader.Close();
-                sqlCommand = new SqlCommand();
-                sqlCommand.Connection = sqlConnection;
-                sqlCommand.CommandText = @"INSERT INTO Supplier (INN, PhysicalAddress, LegalAddress) VALUES (" +
-                    order.INN + ",'" + order.PhysicalAdress + "','" + order.LegalAdress + "');";
-                sqlCommand.ExecuteNonQuery();
-
-                sqlQuery = String.Format("SELECT Top 1 * FROM OrderDB.dbo.Supplier ORDER BY IDSupplier DESC;");
+                string sqlQuery = String.Format("Select * From dbo.Supplier Where IDSupplier =" + order.IDSupplier);
                 sqlCommand = new SqlCommand(sqlQuery, sqlConnection);
                 sqlDataReader = sqlCommand.ExecuteReader();
-                while (sqlDataReader.Read())
-                    order.IDSupplier = sqlDataReader.GetInt32(0);
+                if (!sqlDataReader.HasRows)
+                {
+                    Console.WriteLine("Такого поставщика нет в Базе Данных. Добавим.\n");
+
+                    EnterData.EnterDataSupplier(order);
+
+                    sqlDataReader.Close();
+                    sqlCommand = new SqlCommand();
+                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.CommandText = @"INSERT INTO Supplier (INN, PhysicalAddress, LegalAddress) VALUES (" +
+                        order.INN + ",'" + order.PhysicalAdress + "','" + order.LegalAdress + "');";
+                    sqlCommand.ExecuteNonQuery();
+
+                    sqlQuery = String.Format("SELECT Top 1 * FROM OrderDB.dbo.Supplier ORDER BY IDSupplier DESC;");
+                    sqlCommand = new SqlCommand(sqlQuery, sqlConnection);
+                    sqlDataReader = sqlCommand.ExecuteReader();
+                    while (sqlDataReader.Read())
+                        order.IDSupplier = sqlDataReader.GetInt32(0);
+                }
+                sqlDataReader.Close();
             }
-            sqlDataReader.Close();
 
             return order;
         }

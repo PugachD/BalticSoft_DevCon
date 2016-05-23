@@ -5,7 +5,7 @@ namespace BalticSoft_DevTest
 {
     public class EnterData
     {
-        static public void EnterDataOrder(ref Order order)
+        static public void EnterDataOrder(Order order)
         {
             Console.WriteLine("Введите данные: \nID Документа ");
             order.DocNumber = int.Parse(Console.ReadLine());

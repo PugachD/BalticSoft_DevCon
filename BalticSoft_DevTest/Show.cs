@@ -14,22 +14,13 @@ namespace BalticSoft_DevTest
         static public void ShowOrder(Order order)
         {
             if (order == null)
-                Console.WriteLine("Заказа с таким идентификатором нет!");
+                Console.WriteLine("\nЗаказа с таким идентификатором нет!");
             else
             {
-                Console.WriteLine(String.Format("ID заказа:" + order.IDOrder + "\nНомером документа:" + order.DocNumber +
-                    "\nОбщая сумма заказа:" + order.TotalAmountOrder + "\nID клиента:" + order.IDClient +
-                    "\nСтатус заказа:" + order.TotalAmountOrder + "\nID поставщика:" + order.IDSupplier));
+                Console.WriteLine(String.Format("\nID заказа: " + order.IDOrder + "\nНомером документа: " + order.DocNumber +
+                    "\nОбщая сумма заказа: " + order.TotalAmountOrder + "\nID клиента: " + order.IDClient +
+                    "\nСтатус заказа: " + order.Status + "\nID поставщика: " + order.IDSupplier));
             }
-            /*if (!order.IDSupplier.IsNull)
-            {
-                Console.WriteLine(String.Format("Поставщик с ИНН:" + order.INN + "\nФизический адрес:" + order.PhysicalAdress +
-                "\nЮридический адрес:" + order.LegalAdress));
-            }
-            else
-            {
-                Console.WriteLine(String.Format("Имя клиента:" + order.NameClient + "\nАдрес:" + order.AdressClient));
-            }*/
         }
 
         static public void ShowException(Exception exc)
