@@ -6,3 +6,8 @@ D:\мое\Курсы\BalticSoft_DevTest\BalticSoft_DevTest\obj\Debug\BalticSoft_
 D:\мое\Курсы\BalticSoft_DevTest\BalticSoft_DevTest\bin\Debug\Dnp.dll
 D:\мое\Курсы\BalticSoft_DevTest\BalticSoft_DevTest\bin\Debug\Unit.dll
 D:\мое\Курсы\BalticSoft_DevTest\BalticSoft_DevTest\obj\Debug\BalticSoft_DevTest.csprojResolveAssemblyReference.cache
+C:\Users\Дмитрий\Documents\BalticSoft_DevCon\BalticSoft_DevTest\bin\Debug\BalticSoft_DevTest.exe.config
+C:\Users\Дмитрий\Documents\BalticSoft_DevCon\BalticSoft_DevTest\bin\Debug\BalticSoft_DevTest.exe
+C:\Users\Дмитрий\Documents\BalticSoft_DevCon\BalticSoft_DevTest\bin\Debug\BalticSoft_DevTest.pdb
+C:\Users\Дмитрий\Documents\BalticSoft_DevCon\BalticSoft_DevTest\obj\Debug\BalticSoft_DevTest.exe
+C:\Users\Дмитрий\Documents\BalticSoft_DevCon\BalticSoft_DevTest\obj\Debug\BalticSoft_DevTest.pdb
